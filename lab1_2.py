@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from random import random
 import statistics
+import scipy
 
 from math import pi as PI
 from math import e as E
@@ -59,41 +60,43 @@ def get_median(x: list[float]):
     return x[middle]
 
 
-# Change to mean moment
-def get_mean(x: list[float]):
-    return sum(x) / len(x)
+def get_raw_moment(x: list[float], order=1):
+    return sum([k**order for k in x]) / len(x)
 
 
-# Change to central moment
-def get_variance(x: list[float]):
+def get_moment(x: list[float], order=1):
     variance = 0
 
-    m = get_mean(x)
+    m = get_raw_moment(x)
     n = len(x)
 
     for el in x:
-        variance += (el - m)**2
+        variance += (el - m)**order
 
-    variance /= len(x)
+    variance /= n
 
     return variance
 
 
 def get_unbiased_variance(x: list[float]):
     n = len(x)
-    return get_variance(x) * n / (n - 1)
+    return get_moment(x, 2) * n / (n - 1)
 
 
 def get_standard_deviation(x: list[float]):
     return get_unbiased_variance(x)**0.5
 
 
-def get_assymetry(x: list[float]):
-    pass
+def get_asymmetry(x: list[float]):
+    nu_3 = get_moment(x, 3)
+    q = get_standard_deviation(x)
+    return nu_3 / q**3
 
 
 def get_excess(x: list[float]):
-    pass
+    nu_4 = get_moment(x, 4)
+    q = get_standard_deviation(x)
+    return nu_4 / q**4 - 3
 
 
 if __name__ == '__main__':
@@ -125,10 +128,12 @@ if __name__ == '__main__':
     my_mode_idiot = get_mode(data_user)
     my_mode = get_mode(data_discret)
     my_median = get_median(data_discret)
-    my_mean = get_mean(data_discret)
-    my_variance = get_variance(data_discret)
+    my_mean = get_raw_moment(data_discret, 1)
+    my_variance = get_moment(data_discret, 2)
     my_unbiased_variance = get_unbiased_variance(data_discret)
     my_standard_deviation = get_standard_deviation(data_discret)
+    my_excess = get_excess(data_discret)
+    my_asymmetry = get_asymmetry(data_discret)
 
     mode_idiot = statistics.mode(data_user)  # if not discret than the function will just find the most repeated value like an idiot
     mode = statistics.mode(data_discret)
@@ -137,6 +142,8 @@ if __name__ == '__main__':
     variance = statistics.pvariance(data_discret)
     unbiased_variance = statistics.variance(data_discret)
     standard_deviation = statistics.stdev(data_discret)
+    excess = scipy.stats.kurtosis(data_discret)  # Fisher definition is used. (3rd semester's flashbacks...)
+    asymmetry = scipy.stats.skew(data_discret)
 
     print(f"My data:")
     print(f"Mode_idiot: {my_mode_idiot}")
@@ -146,6 +153,8 @@ if __name__ == '__main__':
     print(f"Variance: {my_variance}")
     print(f"Unbiased variance: {my_unbiased_variance}")
     print(f"Standard deviation: {my_standard_deviation}")
+    print(f"Excess (kurtosis): {my_excess}")
+    print(f"Asymmetry (skew): {my_asymmetry}")
 
     print()
 
@@ -157,5 +166,7 @@ if __name__ == '__main__':
     print(f"Variance: {variance}")
     print(f"Unbiased variance: {unbiased_variance}")
     print(f"Standard deviation: {standard_deviation}")
+    print(f"Excess (kurtosis): {excess}")
+    print(f"Asymmetry (skew): {asymmetry}")
 
     plt.show()
