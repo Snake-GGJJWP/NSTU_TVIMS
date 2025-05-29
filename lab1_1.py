@@ -11,10 +11,10 @@ def uniform_distribution(n: int):
 
 
 # Use CLT
-def normal_distribution(n: int):
+def normal_distribution(n: int, mu: float, sigma: float):
     m = CLT_SUM / 2  # uniform distribution mean
-    q = CLT_SUM / 12  # uniform distribution standard deviation
-    return [(sum(uniform_distribution(CLT_SUM)) - m) / q for _ in range(n)]  # normalized
+    q = (CLT_SUM / 12)**0.5  # uniform distribution standard deviation
+    return [mu + sigma * (sum(uniform_distribution(CLT_SUM)) - m) / q for _ in range(n)]  # N(0,1) -> N(μ,σ^2)
 
 
 def get_interval_frequencies(data: list[float], num_bins: int) -> list[float]:
@@ -76,7 +76,7 @@ if __name__ == '__main__':
 
     plt.title(f'Histogram of {N} Normally Distributed Values')
 
-    arr = normal_distribution(N)
+    arr = normal_distribution(N, 0, 1)
     model_histogram_by_bins(arr, 50)
     plt.show()
 
